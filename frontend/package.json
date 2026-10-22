@@ -1,0 +1,20 @@
+{
+    "version":  "1.0.0",
+    "name":  "pathwise-ui",
+    "scripts":  {
+                    "preview":  "vite preview",
+                    "build":  "vite build",
+                    "dev":  "vite"
+                },
+    "devDependencies":  {
+                            "vite":  "^6.0.0",
+                            "@vitejs/plugin-react":  "^4.3.4"
+                        },
+    "type":  "module",
+    "dependencies":  {
+                         "react":  "^18.3.1",
+                         "recharts":  "^2.13.0",
+                         "react-dom":  "^18.3.1"
+                     },
+    "private":  true
+}

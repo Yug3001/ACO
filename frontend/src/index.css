@@ -1,0 +1,144 @@
+/* ===================================================
+   PathWise — Light Theme Global Styles
+   =================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Backgrounds */
+  --bg:        #f0f4f8;
+  --surface:   #ffffff;
+  --surface2:  #f7f9fc;
+  --border:    #dde3ec;
+
+  /* Brand colours */
+  --accent:    #4f46e5;        /* indigo */
+  --accent-h:  #4338ca;
+  --accent2:   #059669;        /* emerald */
+  --danger:    #dc2626;
+  --warn:      #d97706;
+  --success:   #16a34a;
+  --info:      #0284c7;
+
+  /* Text */
+  --text:      #1e293b;
+  --text-soft: #475569;
+  --muted:     #94a3b8;
+
+  /* Misc */
+  --radius: 10px;
+  --shadow: 0 1px 6px rgba(0,0,0,0.08), 0 4px 24px rgba(0,0,0,0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+body {
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.17s;
+}
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 20px;
+  box-shadow: 0 2px 12px rgba(79,70,229,0.28);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-h);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(79,70,229,0.35);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+}
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #f0f0fe;
+}
+
+/* Inputs / Selects */
+select, input[type=number] {
+  background: var(--surface);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+select:focus, input:focus { border-color: var(--accent); }
+
+label { font-size: 12px; color: var(--text-soft); display: block; margin-bottom: 3px; font-weight: 500; }
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Section title */
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 12px;
+}
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.tag-success { background: #dcfce7; color: #15803d; }
+.tag-danger  { background: #fee2e2; color: #b91c1c; }
+.tag-warn    { background: #fef3c7; color: #b45309; }
+.tag-info    { background: #dbeafe; color: #1d4ed8; }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* Range inputs */
+input[type=range] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  border: none;
+  padding: 0;
+}
