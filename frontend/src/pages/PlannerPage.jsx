@@ -1,6 +1,4 @@
-// src/pages/PlannerPage.jsx
-// -------------------------
-// Main page: interactive grid editor + algorithm selector + run + results.
+// src/pages/PlannerPage.jsx — Responsive layout + animations
 import React, { useState, useCallback, useEffect } from "react";
 import Grid from "../components/Grid.jsx";
 import AlgorithmParams from "../components/AlgorithmParams.jsx";
@@ -11,6 +9,7 @@ import { runAlgorithm } from "../api.js";
 
 const ALGORITHMS  = ["ACO", "GA", "PSO", "A*"];
 const ALGO_COLORS = { ACO: "#6c63ff", GA: "#00d4aa", PSO: "#ffb347", "A*": "#ff5757" };
+const ALGO_ICONS  = { ACO: "🐜", GA: "🧬", PSO: "🌪️", "A*": "⭐" };
 const ALGO_DESC   = {
   ACO: "Ant Colony Optimization — pheromone-guided search",
   GA:  "Genetic Algorithm — evolution-based search",
@@ -19,10 +18,10 @@ const ALGO_DESC   = {
 };
 
 const MODES = [
-  { id: "obstacle", label: "Obstacle", key: "O" },
-  { id: "start",    label: "Set Start", key: "S" },
-  { id: "goal",     label: "Set Goal",  key: "G" },
-  { id: "erase",    label: "Erase",     key: "E" },
+  { id: "obstacle", label: "Obstacle", icon: "⬛" },
+  { id: "start",    label: "Set Start", icon: "🟢" },
+  { id: "goal",     label: "Set Goal",  icon: "🔴" },
+  { id: "erase",    label: "Erase",     icon: "🧹" },
 ];
 
 export default function PlannerPage({ setSharedGrid }) {
@@ -33,16 +32,15 @@ export default function PlannerPage({ setSharedGrid }) {
     addRandomObstacles, clearObstacles,
   } = useGrid(10, 10);
 
-  const [mode, setMode]         = useState("obstacle");
-  const [algorithm, setAlgo]    = useState("ACO");
-  const [params, setParams]     = useState({});
-  const [running, setRunning]   = useState(false);
-  const [result, setResult]     = useState(null);
-  const [error, setError]       = useState(null);
-  const [animPath, setAnimPath] = useState([]);
+  const [mode, setMode]           = useState("obstacle");
+  const [algorithm, setAlgo]      = useState("ACO");
+  const [params, setParams]       = useState({});
+  const [running, setRunning]     = useState(false);
+  const [result, setResult]       = useState(null);
+  const [error, setError]         = useState(null);
+  const [animPath, setAnimPath]   = useState([]);
   const [pheromone, setPheromone] = useState(null);
 
-  // Share grid state with Compare/Analysis pages
   useEffect(() => {
     setSharedGrid({ grid, start, goal });
   }, [grid, start, goal, setSharedGrid]);
@@ -96,7 +94,7 @@ export default function PlannerPage({ setSharedGrid }) {
     } catch (e) {
       setError(
         e.message.includes("fetch") || e.message.includes("connect")
-          ? "Unable to connect to the backend. Make sure the FastAPI server is running on port 8000."
+          ? "Unable to connect to the backend. It may be waking up (Render free tier). Please wait 30–60 seconds and try again."
           : e.message || "Algorithm execution failed."
       );
     } finally {
@@ -108,48 +106,62 @@ export default function PlannerPage({ setSharedGrid }) {
   const cellSize = Math.max(22, Math.min(46, Math.floor(500 / Math.max(cols, rows))));
 
   return (
-    <div style={{ display: "flex", gap: 20, padding: "20px 20px", alignItems: "flex-start", flexWrap: "wrap" }}>
+    <div className="planner-layout">
 
       {/* ============ LEFT — GRID AREA ============ */}
-      <div style={{ flex: "1 1 500px", minWidth: 0 }}>
+      <div className="planner-left">
         <h2 style={{ fontWeight: 800, fontSize: 22, marginBottom: 3 }}>Path Planner</h2>
         <p style={{ color: "#64748b", marginBottom: 16, fontSize: 13 }}>
           Interactive Path Planning using Soft Computing Algorithms
         </p>
 
         {/* Mode toolbar */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <div className="toolbar">
           {MODES.map(m => (
             <button
               key={m.id}
               onClick={() => setMode(m.id)}
               style={{
-                padding: "7px 14px", borderRadius: 7, fontWeight: 600, fontSize: 12,
+                padding: "7px 13px",
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 12,
                 background: mode === m.id ? "#eef2ff" : "transparent",
                 color:      mode === m.id ? "#4f46e5" : "#64748b",
                 border:    `1.5px solid ${mode === m.id ? "#4f46e5" : "#dde3ec"}`,
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                transition: "all 0.15s",
               }}
             >
-              {m.label}
+              <span>{m.icon}</span> {m.label}
             </button>
           ))}
-          <span style={{ width: 1, height: 24, background: "#dde3ec", margin: "0 4px" }} />
+          <span style={{ width: 1, height: 24, background: "#dde3ec", margin: "0 3px", flexShrink: 0 }} />
           <button className="btn-secondary" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => addRandomObstacles(0.22)}>Random</button>
           <button className="btn-secondary" style={{ fontSize: 12, padding: "6px 12px" }} onClick={clearObstacles}>Clear</button>
           <button className="btn-secondary" style={{ fontSize: 12, padding: "6px 12px" }} onClick={resetGrid}>Reset</button>
         </div>
 
         {/* Grid size selector */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 14, alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: "#64748b" }}>Grid size:</span>
+        <div className="size-bar">
+          <span style={{ fontSize: 12, color: "#64748b", flexShrink: 0 }}>Grid size:</span>
           {[8, 10, 12, 15, 20].map(s => (
             <button
               key={s}
               onClick={() => { resizeGrid(s, s); setResult(null); setAnimPath([]); setPheromone(null); }}
-              style={{ padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: rows === s ? "#4f46e5" : "transparent", color: rows === s ? "#fff" : "#64748b", border: `1px solid ${rows === s ? "#4f46e5" : "#dde3ec"}`, cursor: "pointer" }}
+              style={{
+                padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
+                background: rows === s ? "#4f46e5" : "transparent",
+                color: rows === s ? "#fff" : "#64748b",
+                border: `1px solid ${rows === s ? "#4f46e5" : "#dde3ec"}`,
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
             >
-              {s}x{s}
+              {s}×{s}
             </button>
           ))}
         </div>
@@ -167,12 +179,14 @@ export default function PlannerPage({ setSharedGrid }) {
 
         {/* Convergence chart */}
         {result && convergenceData.filter(p => p.y !== -1).length > 0 && algorithm !== "A*" && (
-          <ConvergenceChart convergence={convergenceData} algorithm={algorithm} color={ALGO_COLORS[algorithm]} />
+          <div className="animate-slide-up" style={{ marginTop: 16 }}>
+            <ConvergenceChart convergence={convergenceData} algorithm={algorithm} color={ALGO_COLORS[algorithm]} />
+          </div>
         )}
       </div>
 
       {/* ============ RIGHT — CONTROL PANEL ============ */}
-      <div style={{ flex: "0 0 270px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className="planner-right">
 
         {/* Algorithm selector */}
         <div className="card">
@@ -183,17 +197,29 @@ export default function PlannerPage({ setSharedGrid }) {
                 key={a}
                 onClick={() => { setAlgo(a); setResult(null); setAnimPath([]); setPheromone(null); setError(null); }}
                 style={{
-                  padding: "10px 6px", borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: "pointer",
-                  background: algorithm === a ? `${ALGO_COLORS[a]}15` : "transparent",
+                  padding: "10px 6px",
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  background: algorithm === a ? `${ALGO_COLORS[a]}18` : "transparent",
                   color:      algorithm === a ? ALGO_COLORS[a]         : "#64748b",
                   border:    `1.5px solid ${algorithm === a ? ALGO_COLORS[a] : "#dde3ec"}`,
+                  transition: "all 0.18s",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  boxShadow: algorithm === a ? `0 2px 8px ${ALGO_COLORS[a]}30` : "none",
                 }}
               >
-                {a}
+                <span>{ALGO_ICONS[a]}</span> {a}
               </button>
             ))}
           </div>
-          <p style={{ fontSize: 11, color: "#64748b", lineHeight: 1.5 }}>{ALGO_DESC[algorithm]}</p>
+          <p style={{ fontSize: 11, color: "#64748b", lineHeight: 1.5, background: "#f8fafc", padding: "8px 10px", borderRadius: 7 }}>
+            {ALGO_DESC[algorithm]}
+          </p>
         </div>
 
         {/* Parameters */}
@@ -208,32 +234,47 @@ export default function PlannerPage({ setSharedGrid }) {
           onClick={handleRun}
           disabled={running}
           style={{
-            padding: "14px 0", borderRadius: 9, fontSize: 15, fontWeight: 800, width: "100%",
+            padding: "14px 0",
+            borderRadius: 10,
+            fontSize: 15,
+            fontWeight: 800,
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
           }}
         >
-          {running ? "Running..." : "Run Algorithm"}
+          {running
+            ? <><span className="spinner" />Running…</>
+            : <><span>▶</span> Run Algorithm</>
+          }
         </button>
 
         {/* Error */}
         {error && (
-          <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#ef4444", lineHeight: 1.5 }}>
-            {error}
+          <div className="animate-slide-up" style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#ef4444", lineHeight: 1.6 }}>
+            ⚠️ {error}
           </div>
         )}
 
         {/* Result card */}
-        <ResultCard result={result} />
+        {result && (
+          <div className="result-appear">
+            <ResultCard result={result} />
+          </div>
+        )}
 
         {/* Legend */}
         <div className="card">
           <div className="section-title">Legend</div>
           {[
-            { bg: "#16a34a",                  label: "Start cell" },
-            { bg: "#dc2626",                  label: "Goal cell" },
-            { bg: "#334155",                  label: "Obstacle" },
-            { bg: "#f8fafc",                  label: "Free cell" },
-            { bg: "rgba(129,140,248,0.7)",    label: "Path" },
-            { bg: "rgba(217,119,6,0.6)",      label: "Pheromone (ACO only)" },
+            { bg: "linear-gradient(135deg,#16a34a,#15803d)", label: "Start cell" },
+            { bg: "linear-gradient(135deg,#dc2626,#b91c1c)", label: "Goal cell" },
+            { bg: "linear-gradient(135deg,#334155,#1e293b)", label: "Obstacle" },
+            { bg: "#f8fafc",                                  label: "Free cell" },
+            { bg: "linear-gradient(135deg,#818cf8,#6366f1)", label: "Path" },
+            { bg: "rgba(217,119,6,0.6)",                      label: "Pheromone (ACO only)" },
           ].map(({ bg, label }) => (
             <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
               <span style={{ width: 14, height: 14, borderRadius: 3, background: bg, border: "1px solid rgba(0,0,0,0.1)", flexShrink: 0, display: "inline-block" }} />
