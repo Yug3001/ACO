@@ -6,53 +6,6 @@ real-time interactive web UI. Built for a Soft Computing college project.
 
 ---
 
-## Project Structure
-
-```
-ACO/
-├── backend/                  ← Python FastAPI server
-│   ├── algorithms/
-│   │   ├── aco.py            ← Ant Colony Optimization
-│   │   ├── genetic_algorithm.py  ← Genetic Algorithm
-│   │   ├── pso.py            ← Particle Swarm Optimization
-│   │   └── astar.py          ← A* Search
-│   ├── environment/
-│   │   └── grid.py           ← GridEnvironment (shared by all algorithms)
-│   ├── comparison/
-│   │   ├── runner.py         ← Run all algorithms on same grid
-│   │   └── metrics.py        ← Statistical comparison
-│   ├── visualization/
-│   │   └── data_formatter.py ← JSON formatter for React UI
-│   ├── maps/                 ← Map files (S/F/E/O format)
-│   ├── api.py                ← FastAPI REST endpoints
-│   ├── requirements.txt
-│   └── start.bat             ← Windows one-click start
-│
-├── frontend/                 ← React + Vite web UI
-│   ├── src/
-│   │   ├── App.jsx           ← Root + page routing
-│   │   ├── api.js            ← API client (all fetch calls)
-│   │   ├── components/
-│   │   │   ├── Grid.jsx          ← Interactive path-planning grid
-│   │   │   ├── Navbar.jsx        ← Top navigation
-│   │   │   ├── AlgorithmParams.jsx ← Per-algorithm parameter sliders
-│   │   │   ├── ResultCard.jsx    ← Execution result display
-│   │   │   └── ConvergenceChart.jsx ← Recharts convergence graph
-│   │   ├── hooks/
-│   │   │   └── useGrid.js    ← Grid state management hook
-│   │   └── pages/
-│   │       ├── PlannerPage.jsx   ← Page 1: interactive grid + run
-│   │       ├── ComparePage.jsx   ← Page 2: compare all algorithms
-│   │       └── AnalysisPage.jsx  ← Page 3: multi-trial analysis
-│   ├── package.json
-│   ├── vite.config.js
-│   └── start.bat             ← Windows one-click start
-│
-└── README.md
-```
-
----
-
 ## Quick Start
 
 ### 1. Start the Backend
