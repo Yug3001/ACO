@@ -4,7 +4,7 @@ import Navbar       from "./components/Navbar.jsx";
 import PlannerPage  from "./pages/PlannerPage.jsx";
 import ComparePage  from "./pages/ComparePage.jsx";
 import AnalysisPage from "./pages/AnalysisPage.jsx";
-import { healthCheck } from "./api.js";
+import { healthCheck, BASE_URL } from "./api.js";
 
 // ── Error Boundary ──────────────────────────────────────────────────────────
 class ErrorBoundary extends React.Component {
@@ -32,7 +32,7 @@ class ErrorBoundary extends React.Component {
 }
 
 // ── Backend Banner ───────────────────────────────────────────────────────────
-function BackendBanner({ status }) {
+function BackendBanner({ status, errorMsg }) {
   if (status === "ok") return null;
 
   if (status === "checking") return (
@@ -51,6 +51,9 @@ function BackendBanner({ status }) {
       <span style={{ color: "#a16207", fontSize: 12 }}>
         The server may be waking up (Render free tier takes ~30–60s). Retrying automatically…
       </span>
+      <span style={{ color: "#78350f", fontSize: 11, fontFamily: "monospace", width: "100%" }}>
+        API: {BASE_URL || "(not set)"} · {errorMsg || "no details"}
+      </span>
     </div>
   );
 }
@@ -59,27 +62,45 @@ function BackendBanner({ status }) {
 export default function App() {
   const [page, setPage]             = useState("planner");
   const [backendStatus, setStatus]  = useState("checking");
+  const [errorMsg, setErrorMsg]     = useState("");
   const [sharedGrid, setSharedGrid] = useState({ grid: null, start: null, goal: null });
 
   useEffect(() => {
+    let cancelled = false;
     let firstCheck = true;
+    let offlineTimer = null;
+
     const check = async () => {
       try {
         await healthCheck();
+        if (cancelled) return;
+        clearTimeout(offlineTimer);
+        setErrorMsg("");
         setStatus("ok");
-      } catch {
-        // On first check, show "checking" for a bit longer before "offline"
+      } catch (e) {
+        if (cancelled) return;
+        console.error("Health check failed:", e.message, "| BASE_URL:", BASE_URL);
+        setErrorMsg(e.message);
+        // On first failure, stay in "checking" briefly before showing "offline"
         if (firstCheck) {
           firstCheck = false;
-          setTimeout(() => setStatus(prev => prev !== "ok" ? "offline" : "ok"), 3000);
+          offlineTimer = setTimeout(
+            () => setStatus(prev => (prev !== "ok" ? "offline" : "ok")),
+            3000
+          );
         } else {
           setStatus("offline");
         }
       }
     };
+
     check();
     const id = setInterval(check, 10000);
-    return () => clearInterval(id);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      clearTimeout(offlineTimer);
+    };
   }, []);
 
   const handleSetSharedGrid = useCallback((g) => setSharedGrid(g), []);
@@ -88,7 +109,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <Navbar page={page} setPage={setPage} backendStatus={backendStatus} />
 
-      <BackendBanner status={backendStatus} />
+      <BackendBanner status={backendStatus} errorMsg={errorMsg} />
 
       <main>
         <ErrorBoundary>
